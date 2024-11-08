@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DynamoDB Web App</title>
+    <script>
+         async function displayDataInTable() {
+            try {
+                const response = await fetch('http://3.90.0.244:8080/fetchData1'); // NOTE TO CHANGE THE IPS FOR THE IPS USED PER SESSION FOR ALL 3 FUNCTIONS HERE BUT KEEP THE PORT
+                if (!response.ok) {
+                    throw new Error('Network respohnse was not ok');
+                }
+                const items = await response.json();
+                //console.log(items);
+                // Create the first table elements
+            const table = document.createElement('table');
+            const headerRow = document.createElement('tr');
+            const headers = ['Item', 'Expiry'];
+        
+            headers.forEach(headerText => {
+                const header = document.createElement('th');
+                header.textContent = headerText;
+                headerRow.appendChild(header);
+            });
+
+            table.appendChild(headerRow);
+        
+            // Populate the first table with data
+            items.forEach(item => {
+                const row = document.createElement('tr');
+                const foodData = item.food_data || {};
+                const itemCell = document.createElement('td');
+                itemCell.textContent = foodData.M.Item.S || 'N/A';
+                const expiryCell = document.createElement('td');
+                expiryCell.textContent = foodData.M.Expriy.S || 'N/A'; // Fixed typo from "Expriy" to "Expiry"
+        
+                row.appendChild(itemCell);
+                row.appendChild(expiryCell);
+        
+                table.appendChild(row);
+            });
+
+            // Clear previous output and append the new first table
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = ''; // Clear previous output
+            outputDiv.appendChild(table);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+        
+        async function displayTemperatureDataInTable() {
+            try {
+                const response = await fetch('http://3.90.0.244:8080/TempData');
+                if (!response.ok) {
+                    throw new Error('Network respohnse was not ok');
+                }
+                const items = await response.json();
+                //console.log(items);
+                //Create the second table elements
+                const temperatureTable = document.createElement('table');
+                const temperatureHeaderRow = document.createElement('tr');
+                const temperatureHeader = document.createElement('th');
+                temperatureHeader.colSpan = 2; // Span the header across two columns
+                temperatureHeader.textContent = 'Fridge Temperatures'; // Column name for temperature data
+                temperatureHeaderRow.appendChild(temperatureHeader);
+                temperatureTable.appendChild(temperatureHeaderRow);
+
+                // Populate the second table with temperature data
+                items.forEach(item => {
+                    const FridgeTemp = JSON.parse(item.temp_data.S || '{}');
+
+                    // Determine Bottom Fridge Status Text based on string values "true" or "false"
+                    const bottomStatusText = FridgeTemp.BottomFridge.Status?.toString().trim().toLowerCase() === "true" ? "OK" : "NO GOOD";
+
+                    // Bottom Fridge Row
+                    const bottomRow = document.createElement('tr');
+                    const bottomTempCell = document.createElement('td');
+                    bottomTempCell.colSpan = 2; // Span the cell across two columns
+                    bottomTempCell.textContent = `Bottom Fridge Temp: ${FridgeTemp.BottomFridge.Temperature}°C | Bottom Fridge Status: ${bottomStatusText}`;
+                    bottomRow.appendChild(bottomTempCell);
+                    temperatureTable.appendChild(bottomRow);
+
+                    // Determine Top Fridge Status Text based on string values "true" or "false"
+                    const topStatusText = FridgeTemp.TopFridge.Status?.toString().trim().toLowerCase() === "true" ? "OK" : "NO GOOD";
+
+                    // Top Fridge Row
+                    const topRow = document.createElement('tr');
+                    const topTempCell = document.createElement('td');
+                    topTempCell.colSpan = 2; // Span the cell across two columns
+                    topTempCell.textContent = `Top Fridge Temp: ${FridgeTemp.TopFridge.Temperature}°C | Top Fridge Status: ${topStatusText}`;
+                    topRow.appendChild(topTempCell);
+                    temperatureTable.appendChild(topRow);
+                });
+
+                    // Append the new temperature table to the output
+                    const outputDiv = document.getElementById('output2');
+                    outputDiv.innerHTML = ''; // Clear previous output
+                    outputDiv.appendChild(temperatureTable);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            }
+            
+        async function callAI() {
+            try {
+                const response = await fetch('http://3.90.0.244:8080/AIData');
+                if (!response.ok) {
+                    throw new Error('Network respohnse was not ok');
+                }
+                const items = await response.json();
+                //console.log(items);
+                
+                // Remove any existing meal containers
+                const existingContainers3 = document.querySelectorAll('.meal-container');
+                existingContainers3.forEach(container => container.remove());
+
+                // Populate the table with data
+                const items3 = JSON.parse(items.response.candidates[0].content.parts[0].text);
+                // Create containers for each meal
+                items3.forEach(item3 => {
+                    // Create a container for the meal
+                    const mealContainer3 = document.createElement('div');
+                    mealContainer3.classList.add('meal-container');
+
+                    // Food Name
+                    const foodNameSection3 = document.createElement('div');
+                    foodNameSection3.classList.add('meal-section');
+                    const foodNameTitle3 = document.createElement('h3');
+                    foodNameTitle3.textContent = 'Food Name:';
+                    const foodNameText3 = document.createElement('p');
+                    foodNameText3.textContent = item3["Food Name"] || 'N/A';
+                    foodNameSection3.appendChild(foodNameTitle3);
+                    foodNameSection3.appendChild(foodNameText3);
+
+                    // Ingredients
+                    const ingredientsSection3 = document.createElement('div');
+                    ingredientsSection3.classList.add('meal-section');
+                    const ingredientsTitle3 = document.createElement('h3');
+                    ingredientsTitle3.textContent = 'Ingredients:';
+                    const ingredientsText3 = document.createElement('p');
+                    ingredientsText3.textContent = item3["Ingredients"] || 'N/A';
+                    ingredientsSection3.appendChild(ingredientsTitle3);
+                    ingredientsSection3.appendChild(ingredientsText3);
+
+                    // Instructions
+                    const instructionsSection3 = document.createElement('div');
+                    instructionsSection3.classList.add('meal-section');
+                    const instructionsTitle3 = document.createElement('h3');
+                    instructionsTitle3.textContent = 'Instructions:';
+                    const instructionsText3 = document.createElement('p');
+                    instructionsText3.textContent = item3["Instructions"] || 'N/A';
+                    instructionsSection3.appendChild(instructionsTitle3);
+                    instructionsSection3.appendChild(instructionsText3);
+
+                    // Reasons For Picking this Meal
+                    const reasonsSection3 = document.createElement('div');
+                    reasonsSection3.classList.add('meal-section');
+                    const reasonsTitle3 = document.createElement('h3');
+                    reasonsTitle3.textContent = 'Reasons For Picking this Meal:';
+                    const reasonsText3 = document.createElement('p');
+                    reasonsText3.textContent = item3["Reasons For Picking this Meal"] || 'N/A';
+                    reasonsSection3.appendChild(reasonsTitle3);
+                    reasonsSection3.appendChild(reasonsText3);
+
+                    // Append all sections to the meal container
+                    mealContainer3.appendChild(foodNameSection3);
+                    mealContainer3.appendChild(ingredientsSection3);
+                    mealContainer3.appendChild(instructionsSection3);
+                    mealContainer3.appendChild(reasonsSection3);
+
+                    // Append the meal container to the body
+                    document.body.appendChild(mealContainer3);
+                });
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
+            }
+
+        //window.onload = fetchData1; // Fetch data when the page loads
+    </script>
+</head>
+<body>
+    <h1>Refrigerator Information</h1>
+    <button id="fetchDataBtn" onclick="displayDataInTable()">Check Items and Expiry Dates</button>
+    <pre id="output"></pre>
+    <button id="fetchTempBtn" onclick="displayTemperatureDataInTable()">Temperature of Fridge</button>
+    <pre id="output2"></pre>
+    <button id="fetchAIBtn" onclick="callAI()">Fridge Items and Recipes</button>
+    <pre id="output3"></pre>
+</body>
+</html>
