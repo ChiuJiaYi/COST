@@ -7,7 +7,7 @@
     <script>
          async function displayDataInTable() {
             try {
-                const response = await fetch('http://3.90.0.244:8080/fetchData1'); // NOTE TO CHANGE THE IPS FOR THE IPS USED PER SESSION FOR ALL 3 FUNCTIONS HERE BUT KEEP THE PORT
+                const response = await fetch('http://FetchDBandAI-LB-95471280.us-east-1.elb.amazonaws.com:8080/fetchData1'); // NOTE TO CHANGE THE IPS FOR THE IPS USED PER SESSION FOR ALL 3 FUNCTIONS HERE BUT KEEP THE PORT
                 if (!response.ok) {
                     throw new Error('Network respohnse was not ok');
                 }
@@ -52,7 +52,7 @@
         
         async function displayTemperatureDataInTable() {
             try {
-                const response = await fetch('http://3.90.0.244:8080/TempData');
+                const response = await fetch('http://FetchDBandAI-LB-95471280.us-east-1.elb.amazonaws.com:8080/TempData');
                 if (!response.ok) {
                     throw new Error('Network respohnse was not ok');
                 }
@@ -105,7 +105,7 @@
             
         async function callAI() {
             try {
-                const response = await fetch('http://3.90.0.244:8080/AIData');
+                const response = await fetch('http://FetchDBandAI-LB-95471280.us-east-1.elb.amazonaws.com:8080/AIData');
                 if (!response.ok) {
                     throw new Error('Network respohnse was not ok');
                 }
