@@ -5,9 +5,9 @@ const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
 const app = express();
 
 app.use(cors({
-    origin: '*',
-    methods: ['GET'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: '',
+    methods: '',
+    allowedHeaders: '',
 }));
 
 app.use(express.static('.'))
