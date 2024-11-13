@@ -7,13 +7,13 @@
     <script>
          async function displayDataInTable() {
             try {
-                const response = await fetch('http://FetchDBandAI-LB-95471280.us-east-1.elb.amazonaws.com:8080/fetchData1'); // NOTE TO CHANGE THE IPS FOR THE IPS USED PER SESSION FOR ALL 3 FUNCTIONS HERE BUT KEEP THE PORT
+                const response = await fetch('http://FetchDBandAI-LB-95471280.us-east-1.elb.amazonaws.com:8080/fetchData1'); 
                 if (!response.ok) {
-                    throw new Error('Network respohnse was not ok');
+                    throw new Error('Network response was not ok');
                 }
                 const items = await response.json();
                 //console.log(items);
-                // Create the first table elements
+                // Create the item expiry table elements
             const table = document.createElement('table');
             const headerRow = document.createElement('tr');
             const headers = ['Item', 'Expiry'];
@@ -26,14 +26,14 @@
 
             table.appendChild(headerRow);
         
-            // Populate the first table with data
+            // Insert data into item expiry table 
             items.forEach(item => {
                 const row = document.createElement('tr');
                 const foodData = item.food_data || {};
                 const itemCell = document.createElement('td');
                 itemCell.textContent = foodData.M.Item.S || 'N/A';
                 const expiryCell = document.createElement('td');
-                expiryCell.textContent = foodData.M.Expriy.S || 'N/A'; // Fixed typo from "Expriy" to "Expiry"
+                expiryCell.textContent = foodData.M.Expriy.S || 'N/A'; 
         
                 row.appendChild(itemCell);
                 row.appendChild(expiryCell);
@@ -41,7 +41,7 @@
                 table.appendChild(row);
             });
 
-            // Clear previous output and append the new first table
+            // Clear any HTML output before adding item expiry table to the div
             const outputDiv = document.getElementById('output');
             outputDiv.innerHTML = ''; // Clear previous output
             outputDiv.appendChild(table);
@@ -54,47 +54,47 @@
             try {
                 const response = await fetch('http://FetchDBandAI-LB-95471280.us-east-1.elb.amazonaws.com:8080/TempData');
                 if (!response.ok) {
-                    throw new Error('Network respohnse was not ok');
+                    throw new Error('Network response was not ok');
                 }
                 const items = await response.json();
                 //console.log(items);
-                //Create the second table elements
+                // Create the temperature table elements
                 const temperatureTable = document.createElement('table');
                 const temperatureHeaderRow = document.createElement('tr');
                 const temperatureHeader = document.createElement('th');
-                temperatureHeader.colSpan = 2; // Span the header across two columns
-                temperatureHeader.textContent = 'Fridge Temperatures'; // Column name for temperature data
+                temperatureHeader.colSpan = 2; // Make header stretch across two columns
+                temperatureHeader.textContent = 'Fridge Temperatures'; // Column name 
                 temperatureHeaderRow.appendChild(temperatureHeader);
                 temperatureTable.appendChild(temperatureHeaderRow);
 
-                // Populate the second table with temperature data
+                // Insert data into the temperature table 
                 items.forEach(item => {
                     const FridgeTemp = JSON.parse(item.temp_data.S || '{}');
 
-                    // Determine Bottom Fridge Status Text based on string values "true" or "false"
+                    // Determine Bottom Fridge Status Text based on "true" or "false" from DynamoDB, with additional cleaning added to it
                     const bottomStatusText = FridgeTemp.BottomFridge.Status?.toString().trim().toLowerCase() === "true" ? "OK" : "NO GOOD";
 
                     // Bottom Fridge Row
                     const bottomRow = document.createElement('tr');
                     const bottomTempCell = document.createElement('td');
-                    bottomTempCell.colSpan = 2; // Span the cell across two columns
+                    bottomTempCell.colSpan = 2; // Make header stretch across two columns
                     bottomTempCell.textContent = `Bottom Fridge Temp: ${FridgeTemp.BottomFridge.Temperature}°C | Bottom Fridge Status: ${bottomStatusText}`;
                     bottomRow.appendChild(bottomTempCell);
                     temperatureTable.appendChild(bottomRow);
 
-                    // Determine Top Fridge Status Text based on string values "true" or "false"
+                    // Determine Top Fridge Status Text based on "true" or "false" from DynamoDB, with additional cleaning added to it
                     const topStatusText = FridgeTemp.TopFridge.Status?.toString().trim().toLowerCase() === "true" ? "OK" : "NO GOOD";
 
                     // Top Fridge Row
                     const topRow = document.createElement('tr');
                     const topTempCell = document.createElement('td');
-                    topTempCell.colSpan = 2; // Span the cell across two columns
+                    topTempCell.colSpan = 2; // Make header stretch across two columns
                     topTempCell.textContent = `Top Fridge Temp: ${FridgeTemp.TopFridge.Temperature}°C | Top Fridge Status: ${topStatusText}`;
                     topRow.appendChild(topTempCell);
                     temperatureTable.appendChild(topRow);
                 });
 
-                    // Append the new temperature table to the output
+                    // Clear any HTML output before adding temperature table to the div
                     const outputDiv = document.getElementById('output2');
                     outputDiv.innerHTML = ''; // Clear previous output
                     outputDiv.appendChild(temperatureTable);
