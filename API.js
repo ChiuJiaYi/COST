@@ -1,8 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
-
+const crypto = require('crypto');
+const algorithm = 'aes-256-cbc';
+const secretKey = Buffer.from('jfoqidnqjfudjwneidfndjfigpalskdr');
+const iv = crypto.randomBytes(16);
 const app = express();
+
+function encrypt(data) {
+    const cipher = crypto.createCipheriv(algorithm, secretKey, iv);
+    let encrypted = cipher.update(JSON.stringify(data), 'utf8', 'hex');
+    encrypted += cipher.final('hex');
+    return {
+        iv: iv.toString('hex'),
+        encryptedData: encrypted,
+    };
+}
 
 app.use(cors({
     origin: '*',
@@ -22,7 +35,7 @@ app.get('/fetchData1', async (req, res) => {
         const client = new DynamoDBClient({ region: 'us-east-1' });
         const command = new ScanCommand(params);
         const response = await client.send(command);
-        res.json(response.Items); // Return the items as JSON
+        res.json(encrypt(response.Items)); // Return the items as JSON
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).send('Error fetching data from DynamoDB');
@@ -39,7 +52,7 @@ app.get('/TempData', async (req, res) => {
         const client = new DynamoDBClient({ region: 'us-east-1' });
         const command = new ScanCommand(params);
         const response = await client.send(command);
-        res.json(response.Items); // Return the items as JSON
+        res.json(encrypt(response.Items)); // Return the items as JSON
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).send('Error fetching data from DynamoDB');
@@ -108,7 +121,7 @@ const model = genAI.getGenerativeModel({
       role: 'model',
       parts: [
         {
-          text: 'You are an AI assisant that will help with creating possbile recipe using only the fiid the user have. All the information will be stored in multiple different objects. Please take advantage of all the information given to you',
+          text: 'You are an AI assisant that will help with creating possbile recipes using only the food the user have. All the information will be stored in multiple different objects. Please take advantage of all the information given to you',
         },
       ],
     },
@@ -119,7 +132,7 @@ const model = genAI.getGenerativeModel({
   ],
   
 });
-        res.json(result); // Return the items as JSON
+        res.json(encrypt(result)); // Return the items as JSON
     } catch (error) {
         console.error('Error fetching data:', error);
         res.status(500).send('Error fetching data from DynamoDB');
